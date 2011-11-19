@@ -23,10 +23,11 @@ function prettify(xmlStr)
 
 function parse(results, content, indent)
 {
+  if (!content) { return; }
+  
   var match = true;
   var matched = "";
-  
-  var _el = /([\s\S]*?)(<(\S+)(\s+[\s\S]*?)*>)([\s\S]*?)<\/\3>|([\s\S]*?)(<(\S+)[\s\S]*?\/>)/gm;
+  var _el = /([\s\S]*?)(<([^>\s]+)[^>]*?)(>([\s\S]*?)<\/\3>|\/>)/gm;
   
   while (match)
   {
@@ -35,16 +36,20 @@ function parse(results, content, indent)
     if (match)
     {
       var wholeStr = match[0],
-          preContent = match[1] || match[6],
-          startTag = match[2] || match[7],
-          endTag = match[3] ? ("</" + match[3] + ">") : null,
-          elContent = match[5];
+          preContent = match[1],
+          startTag = match[2],
+          tagName = match[3],
+          elContent = match[5],
+          endTag = null;
+        
+        startTag += (elContent) ? '>' : '/>'
+        endTag = (elContent) ? ('</' + tagName + '>') : ''
         
         matched += wholeStr;
         addResult(results, indent, preContent);
         addResult(results, indent, startTag);
-        elContent && parse(results, elContent, indent + 1);
-        endTag && addResult(results, indent, endTag);
+        parse(results, elContent, indent + 1);
+        addResult(results, indent, endTag);
     }
     else
     {

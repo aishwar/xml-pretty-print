@@ -10,6 +10,10 @@ output = prettify('<a>This is a sample</a>');
 console.log(output);
 
 // A whole file
+output = prettify(fs.readFileSync('sample.xml').toString())
+fs.writeFileSync('sample.pretty.xml', output);
+
+// A whole file
 output = prettify(fs.readFileSync('sample2.xml').toString())
 fs.writeFileSync('sample2.pretty.xml', output);
 

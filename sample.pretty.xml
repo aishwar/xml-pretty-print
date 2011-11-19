@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="nutrition.css"?>
+<nutrition>
+  <daily-values>
+    <total-fat units="g">
+      65
+    </total-fat>
+    <saturated-fat units="g">
+      20
+    </saturated-fat>
+    <cholesterol units="mg">
+      300
+    </cholesterol>
+    <sodium units="mg">
+      2400
+    </sodium>
+  </daily-values>
+</nutrition>
