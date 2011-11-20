@@ -1,75 +1,58 @@
-(function () {
+(function (undefined) {
 
-exports.prettify = prettify
+// Allow library to work in both the browser and in node.js
+(typeof exports == "undefined" ? window : exports).prettify = prettify
 
 function parse(xmlStr)
 {
-  var stdOp = /<(\w+)[^>]*?>/m,
-      stdCl = /<\/[^>]*>/m,
-      sngEl = /<[^>]*\/>/m;
+  var opener = /<(\w+)[^>]*?>/m,
+      closer = /<\/[^>]*>/m;
   
-  var indent = 0,
-      tags = [],
+  var idx = 0,
+      indent = 0,
       processing = "",
-      currIdx = 0,
-      output = [];
+      tags = [],
+      output = [],
+      token;
   
-  while (currIdx < xmlStr.length)
+  while (idx < xmlStr.length)
   {
-    processing += xmlStr[currIdx];
+    processing += xmlStr[idx];
     
-    // The 2nd check prevents singularElements from passing as standardOpening elements.
-    // The check for '/' would not have been necessary with a negative lookbehind expression
-    // but Javascript does not support it, and this feels like the easiest way of doing this
-    // check.
-    if (stdOp.test(processing) && processing[processing.length - 2] != '/')
+    if (token = getToken(opener, processing))
     {
-      var matches = stdOp.exec(processing);
-      var match = matches[0];
-      var tag = matches[1];
-      var offset = processing.length - match.length;
-      var preContent = processing.substring(0, offset);
-      
-      addLine(output, preContent, indent);
-      addLine(output, match, indent);
-      
-      tags.push(tag);
-      indent += 1;
-      processing = "";
+      // Check if it is a singular element, e.g. <link />
+      if (processing[processing.length - 2] != '/')
+      {
+        addLine(output, token.preContent, indent);
+        addLine(output, token.match, indent);
+        
+        tags.push(token.tag);
+        indent += 1;
+        processing = "";
+      }
+      else
+      {
+        addLine(output, token.preContent, indent);
+        addLine(output, token.match, indent);
+        processing = "";
+      }
     }
-    else if (stdCl.test(processing))
+    else if (token = getToken(closer, processing))
     {
-      var matches = stdCl.exec(processing);
-      var match = matches[0];
-      var tag = matches[1];
-      var offset = processing.length - match.length;
-      var preContent = processing.substring(0, offset);
+      addLine(output, token.preContent, indent);
       
-      addLine(output, preContent, indent);
-      
-      if (tags[tags.length] == tag)
+      if (tags[tags.length] == token.tag)
       {
         tags.pop();
         indent -= 1;
       }
       
-      addLine(output, match, indent);
-      processing = "";
-    }
-    else if (sngEl.test(processing))
-    {
-      var matches = sngEl.exec(processing);
-      var match = matches[0];
-      var tag = matches[1];
-      var offset = processing.length - match.length;
-      var preContent = processing.substring(0, offset);
-      
-      addLine(output, preContent, indent);
-      addLine(output, match, indent);
+      addLine(output, token.match, indent);
       processing = "";
     }
     
-    currIdx += 1;
+    idx += 1;
   }
   
   if (tags.length && prettify.WARN)
@@ -81,28 +64,34 @@ function parse(xmlStr)
   return output;
 }
 
-function trim(str)
+function getToken(regex, str)
 {
-  return str.replace(/^\s+|\s+$/,"");
+  if (regex.test(str))
+  {
+    var matches = regex.exec(str);
+    var match = matches[0];
+    var offset = str.length - match.length;
+    var preContent = str.substring(0, offset);
+    
+    return {
+      match:match,
+      tag:matches[1],
+      offset:offset,
+      preContent:preContent
+    };
+  }
 }
 
 function addLine(output, content, indent)
 {
-  var result = "";
-  content = trim(content);
-  
-  if (content)
+  // Trim the content
+  if (content = content.replace(/^\s+|\s+$/,""))
   {
-    while (indent--)
-    {
-      result += prettify.TAB;
-    }
+    var tabs = ""
     
-    result += content;
-    output.push(result);
+    while (indent--) { tabs += prettify.TAB; }
+    output.push(tabs + content);
   }
-  
-  return result;
 }
 
 function prettify(xmlStr)
