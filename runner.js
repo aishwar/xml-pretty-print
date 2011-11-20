@@ -18,3 +18,8 @@ output = prettify(fs.readFileSync('sample2.xml').toString())
 fs.writeFileSync('sample2.pretty.xml', output);
 
 
+// Invalid XML file. Should print a warning to the console after conversion.
+output = prettify(fs.readFileSync('sample3.xml').toString())
+fs.writeFileSync('sample3.pretty.xml', output);
+
+
