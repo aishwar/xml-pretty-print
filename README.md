@@ -48,3 +48,6 @@ To set 2 spaces for indentation:
     prettify.TAB = '  '
     prettify('<a>This is a sample</a>')
 
+prettify.WARN: should a warning message be printed to the console if xml input is malformed
+
+

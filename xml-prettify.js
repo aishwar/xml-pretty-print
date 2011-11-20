@@ -72,7 +72,7 @@ function parse(xmlStr)
     currIdx += 1;
   }
   
-  if (tags.length)
+  if (tags.length && prettify.WARN)
   {
     console.log('WARNING: xmlFile may be malformed. Not all opening tags were closed. Following tags were left open:');
     console.log(tags);
